@@ -107,6 +107,11 @@ const UsersController = {
     const currentId = req.session.user._id;
     
     User.findById(hostId, (err, user) => {
+      const pic = req.body.picture
+      const regex = /(https:\/\/.*\.(?:png|jpg|tif|tiff|bmp|jpeg|gif))/g
+      if (regex.test(pic)) {
+        user.picture = pic;
+      }
       if (currentId === hostId) {
         user.save((err) => {
           if (err) {
@@ -118,7 +123,6 @@ const UsersController = {
       } else {
         res.status(201).redirect(`/users/${hostId}`);
       }
-      user.picture = req.body.picture;
     });
   },
 };
