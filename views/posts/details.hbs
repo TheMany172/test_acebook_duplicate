@@ -11,7 +11,10 @@
 <h1>Post</h1>
 
 <a href="/users/{{post.user_id}}">User</a>
-{{post.message}}
+<p>{{post.message}}</p>
+{{#if isPicture}}
+<img width="200" height="200" src={{post.picture}}>
+{{/if}}
 
 <form action="/posts/{{post._id}}/create" method="post">
     <input id="message" type="text" name="message" maxlength="250" required>

@@ -16,6 +16,9 @@
         <a href="/users/{{this.post.user_id}}">{{this.username}}</a>
         <p>{{this.post.message}}</p>
         <p>{{this.post.likes}} likes</p>
+        {{#if this.isPicture}}
+          <img width="80" height="80" src={{this.picture}}>
+        {{/if}}
         {{#if alreadyLiked}}
           <form action="/posts/{{this.post._id}}/unlike" method="post">
             <button type="submit">Unlike</button>
