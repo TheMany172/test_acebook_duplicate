@@ -37,7 +37,9 @@ const PostsController = {
     const post = new Post(req.body);
     post.date = Date.now();
     post.user_id = req.session.user._id;
-    if (post.message === "" || post.message.length > 250) {
+    console.log(post);
+    const regex = /(https:\/\/.*\.(?:png|jpg|tif|tiff|bmp|jpeg|gif))/g
+    if (post.message === "" || post.message.length > 250 || (post.picture != "" && !regex.test(post.picture))) {
       res.status(201).redirect("/posts/new");
     } else if (post.message[0] === " ") {
       const trimmed_post = post.message.trim();
@@ -64,25 +66,32 @@ const PostsController = {
     }
   },
  
-   Like: (req, res) => {
+  Like: (req, res) => {
     const postId = req.params.id;
     const userId = req.session.user._id
-
+  
     Post.findById(postId, (err, post) => {
       if (err) {
         throw err;
       }
-      if (!post.liked_by.includes(userId)) {
+  
+      const alreadyLiked = post.liked_by.includes(userId);
+  
+      if (!alreadyLiked) {
         post.likes = post.likes + 1;
-        post.liked_by.push(userId)
-
-        post.save((err) => {
-          if (err) {
-            throw err;
-          }
-        });
+        post.liked_by.push(userId);
+      } else {
+        post.likes = post.likes - 1;
+        post.liked_by = post.liked_by.filter(id => id !== userId);
       }
-      res.redirect("/posts");
+  
+      post.save((err) => {
+        if (err) {
+          throw err;
+        }
+  
+        res.redirect("/posts");
+      });
     });
   },
 
@@ -92,14 +101,16 @@ const PostsController = {
       if (err) {
         throw err;
       }
-      
       return post;
     }).then((post) => (
       Comment.find((err, comments) => {
         if (err) {
           throw err;
         }
-        res.render("posts/details", {comments: comments, post: post, session_user: req.session.user});
+
+        let isPicture = post.picture !== "";
+
+        res.render("posts/details", {comments: comments, post: post, session_user: req.session.user, isPicture: isPicture});
       }).where({post_id: postId})
     ));
   },
