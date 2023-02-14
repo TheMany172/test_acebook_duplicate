@@ -28,7 +28,10 @@ const UsersController = {
   },
   
   Details: (req, res) => {
-    const userId = req.params.id;
+    if (!req.session.user && !req.cookies.user_sid) {
+      res.redirect("/sessions/new");
+    } else {
+      const userId = req.params.id;
     const sessionId = req.session.user._id;
 
     User.findById(userId, (err, user) => {
@@ -52,6 +55,7 @@ const UsersController = {
         is_session_user: isSessionUser,
       });
     });
+    }
   },
 
   Request: (req, res) => {
@@ -67,11 +71,10 @@ const UsersController = {
         if (err) {
           throw err;
         }
-
         let regex = /^\w*[^@]/g;
         let username = current_user.email.match(regex);
-
-        if (targetId != currentId)
+        
+        if (current_user.friends.filter(object => object.user_id === targetId).length === 0 && targetId != currentId)
         {
           if (user.friends.filter(object => object.user_id === currentId).length === 0) {
             user.friends.push({user_id: `${currentId}`, status: "pending", username: username,})
@@ -96,8 +99,27 @@ const UsersController = {
       if (err) {
         throw err;
       }
-      res.status(201).redirect(`/users/${hostId}`);
-    });
+    }).then(
+      User.findById(theirId, (err, user) => {
+      if (err) {
+        throw err;
+      }
+      if (user.friends.filter(object => object.user_id === hostId).length === 0) {
+        user.friends.push({user_id: `${hostId}`, status: "confirmed"})
+
+        user.save((err) => {
+          if (err) {
+            throw err;
+          }
+          res.status(201).redirect(`/users/${hostId}`);
+        });
+      } else {
+        res.status(201).redirect(`/users/${hostId}`);
+      }
+      })
+    );
+
+    
   },
 
   Deny: (req, res) => {
@@ -139,6 +161,11 @@ const UsersController = {
     const currentId = req.session.user._id;
     
     User.findById(hostId, (err, user) => {
+      const pic = req.body.picture
+      const regex = /(https:\/\/.*\.(?:png|jpg|tif|tiff|bmp|jpeg|gif|JPG))/g
+      if (regex.test(pic)) {
+        user.picture = pic;
+      }
       if (currentId === hostId) {
         user.save((err) => {
           if (err) {
@@ -150,7 +177,6 @@ const UsersController = {
       } else {
         res.status(201).redirect(`/users/${hostId}`);
       }
-      user.picture = req.body.picture;
     });
   },
 };
