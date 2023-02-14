@@ -52,7 +52,7 @@ const UsersController = {
       res.render("users/details", {
         user: user,
         session_user: req.session.user,
-        is_session_user: isSessionUser
+        is_session_user: isSessionUser,
       });
     });
     }
@@ -63,7 +63,7 @@ const UsersController = {
     const targetId = req.params.id;
 
     User.findById(currentId, (err) => {
-      if (err) {
+      if(err){
         throw err;
       }
     }).then((current_user) => {
@@ -71,10 +71,13 @@ const UsersController = {
         if (err) {
           throw err;
         }
+        let regex = /^\w*[^@]/g;
+        let username = current_user.email.match(regex);
+        
         if (current_user.friends.filter(object => object.user_id === targetId).length === 0 && targetId != currentId)
         {
           if (user.friends.filter(object => object.user_id === currentId).length === 0) {
-            user.friends.push({user_id: `${currentId}`, status: "pending"})
+            user.friends.push({user_id: `${currentId}`, status: "pending", username: username,})
     
             user.save((err) => {
               if (err) {
@@ -123,13 +126,35 @@ const UsersController = {
     const theirId = req.params.id;
     const hostId = req.session.user._id;
 
-    User.findOneAndUpdate({"_id": hostId, "friends.user_id": theirId}, {"$set": {"friends.$.status": "denied"}}, (err) => {
+    console.log(theirId)
+    console.log(hostId)
+
+    User.findById(hostId, (err, user) => {
       if (err) {
         throw err;
       }
+      
+      let j = 0;
+      for(let i = 0; i < user.friends.length; i++) {
+        if (user.friends.some(user => user.user_id === theirId)) {
+          j++;
+        }
+      }
+      console.log(j);
+      if (j > 0) {
+        let index = user.friends.indexOf(theirId)
+        user.friends.splice(index, 1)
+      }
+
+      user.save((err) => {
+        if (err) {
+          throw err;
+        }
+      });
+
       res.status(201).redirect(`/users/${hostId}`);
-    });
-  },
+    })
+},
 
   Picture: (req, res) => {
     const hostId = req.params.id;
