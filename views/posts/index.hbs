@@ -17,7 +17,7 @@
         <p>{{this.post.message}}</p>
         <p>{{this.post.likes}} likes</p>
         {{#if this.isPicture}}
-          <img width="80" height="80" src={{this.picture}}>
+          <img width="80" height="80" src={{this.post.picture}}>
         {{/if}}
         {{#if alreadyLiked}}
           <form action="/posts/{{this.post._id}}/unlike" method="post">
