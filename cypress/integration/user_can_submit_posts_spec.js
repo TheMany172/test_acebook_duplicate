@@ -17,8 +17,8 @@ describe("Timeline Posts", () => {
     cy.visit("/posts");
     cy.contains("New post").click();
 
-    cy.get("#new-post-form").find('[type="text"]').type("Hello, world!");
-    cy.get("#new-post-form").submit();
+    cy.get("#message").type("Hello, world!");
+    cy.get("#new-post-form > [type='submit']").click();
 
     cy.get(".posts").should("contain", "Hello, world!");
   });
@@ -67,8 +67,8 @@ describe("Timeline Posts", () => {
     // Submit a post with just spaces - this should not post
     cy.visit("/posts");
     cy.contains("New post").click();
-    cy.get("#new-post-form").find('[type="text"]').type("      ");
-    cy.get('#new-post-form > [type="submit"]').click()
+    cy.get("#message").type("      ");
+    cy.get("#new-post-form > [type='submit']").click();
     cy.url().should("include", "/posts/new");
   });
 
@@ -88,8 +88,8 @@ describe("Timeline Posts", () => {
 
     cy.visit("/posts");
     cy.contains("New post").click();
-    cy.get("#new-post-form").find('[type="text"]').type("            Hello, world!         ");
-    cy.get('#new-post-form > [type="submit"]').click()
+    cy.get("#message").type("            Hello, world!         ");
+    cy.get("#new-post-form > [type='submit']").click();
     cy.get('ul').should('contain.text',"Hello, world!");
   });
 });

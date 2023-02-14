@@ -17,8 +17,8 @@ describe("Timeline Likes", () => {
         cy.visit("/posts");
         cy.contains("New post").click();
 
-        cy.get("#new-post-form").find('[type="text"]').type("Testing time 1234");
-        cy.get("#new-post-form").submit();
+        cy.get("#message").type("Testing time 1234");
+        cy.get("#new-post-form > [type='submit']").click();
 
         cy.get(".posts").should("contain", "Testing time 1234");
 
@@ -49,15 +49,15 @@ describe("Timeline Likes", () => {
 
         // submit first post
         cy.contains("New post").click();
-        cy.get("#new-post-form").find('[type="text"]').type("Testing time 1");
-        cy.get("#new-post-form").submit();
+        cy.get("#message").type("Testing time 1");
+        cy.get("#new-post-form > [type='submit']").click();
 
         cy.get(".posts").should("contain", "Testing time 1");
 
         // submit second post
         cy.contains("New post").click();
-        cy.get("#new-post-form").find('[type="text"]').type("Testing time 2");
-        cy.get("#new-post-form").submit();
+        cy.get("#message").type("Testing time 2");
+        cy.get("#new-post-form > [type='submit']").click();
 
         cy.get(".posts").should("contain", "Testing time 2");
         cy.get("button:first").click();
