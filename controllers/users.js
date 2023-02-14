@@ -28,7 +28,10 @@ const UsersController = {
   },
   
   Details: (req, res) => {
-    const userId = req.params.id;
+    if (!req.session.user && !req.cookies.user_sid) {
+      res.redirect("/sessions/new");
+    } else {
+      const userId = req.params.id;
     const sessionId = req.session.user._id;
 
     User.findById(userId, (err, user) => {
@@ -52,6 +55,7 @@ const UsersController = {
         is_session_user: isSessionUser
       });
     });
+    }
   },
 
   Request: (req, res) => {
@@ -86,8 +90,27 @@ const UsersController = {
       if (err) {
         throw err;
       }
-      res.status(201).redirect(`/users/${hostId}`);
-    });
+    }).then(
+      User.findById(theirId, (err, user) => {
+      if (err) {
+        throw err;
+      }
+      if (user.friends.filter(object => object.user_id === hostId).length === 0) {
+        user.friends.push({user_id: `${hostId}`, status: "confirmed"})
+
+        user.save((err) => {
+          if (err) {
+            throw err;
+          }
+          res.status(201).redirect(`/users/${hostId}`);
+        });
+      } else {
+        res.status(201).redirect(`/users/${hostId}`);
+      }
+      })
+    );
+
+    
   },
 
   Deny: (req, res) => {
