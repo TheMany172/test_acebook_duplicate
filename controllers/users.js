@@ -62,24 +62,30 @@ const UsersController = {
     const currentId = req.session.user._id;
     const targetId = req.params.id;
 
-    User.findById(targetId, (err, user) => {
+    User.findById(currentId, (err) => {
       if (err) {
         throw err;
       }
-      if (targetId != currentId)
-      {
-        if (user.friends.filter(object => object.user_id === currentId).length === 0) {
-          user.friends.push({user_id: `${currentId}`, status: "pending"})
-  
-          user.save((err) => {
-            if (err) {
-              throw err;
-            }
-          });
+    }).then((current_user) => {
+      User.findById(targetId, (err, user) => {
+        if (err) {
+          throw err;
         }
-      }
-      res.status(201).redirect(`/users/${targetId}`);
-    });
+        if (current_user.friends.filter(object => object.user_id === targetId).length === 0 && targetId != currentId)
+        {
+          if (user.friends.filter(object => object.user_id === currentId).length === 0) {
+            user.friends.push({user_id: `${currentId}`, status: "pending"})
+    
+            user.save((err) => {
+              if (err) {
+                throw err;
+              }
+            });
+          }
+        }
+        res.status(201).redirect(`/users/${targetId}`);
+      });
+    })
   },
 
   Confirm: (req, res) => {
@@ -131,7 +137,7 @@ const UsersController = {
     
     User.findById(hostId, (err, user) => {
       const pic = req.body.picture
-      const regex = /(https:\/\/.*\.(?:png|jpg|tif|tiff|bmp|jpeg|gif))/g
+      const regex = /(https:\/\/.*\.(?:png|jpg|tif|tiff|bmp|jpeg|gif|JPG))/g
       if (regex.test(pic)) {
         user.picture = pic;
       }
