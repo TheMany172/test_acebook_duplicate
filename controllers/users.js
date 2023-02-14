@@ -126,9 +126,6 @@ const UsersController = {
     const theirId = req.params.id;
     const hostId = req.session.user._id;
 
-    console.log(theirId)
-    console.log(hostId)
-
     User.findById(hostId, (err, user) => {
       if (err) {
         throw err;
@@ -140,7 +137,6 @@ const UsersController = {
           j++;
         }
       }
-      console.log(j);
       if (j > 0) {
         let index = user.friends.indexOf(theirId)
         user.friends.splice(index, 1)
