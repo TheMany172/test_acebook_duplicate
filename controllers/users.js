@@ -10,17 +10,21 @@ const UsersController = {
 
     User.findOne({email : user.email}, (err, founduser) => {
       if (err) {
+        console.log("found user err", err);
         throw err;
       }
 
       if (user.email === "" || user.password.length < 8 || founduser != null) {
         req.session.error = "INVALID USERNAME OR PASSWORD";
+        console.log("invalid username or password", user.email, user.password, founduser);
         res.redirect("/users/new");
       } else if (founduser === null) {
         user.save((err) => {
+          console.log("successful signup", err);
           if (err) {
             throw err;
           }
+          console.log("redirect to log in")
           res.status(201).redirect("/sessions/new");
         });
       }
