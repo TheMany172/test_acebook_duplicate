@@ -26,7 +26,7 @@ app.use(methodOverride("_method"));
 
 app.use(
   session({
-    key: "Test_key",
+    key: "user_sid",
     secret: "super_secret",
     resave: false,
     saveUninitialized: false,
